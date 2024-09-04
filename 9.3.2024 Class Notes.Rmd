@@ -1,18 +1,21 @@
 ---
-title: "9.3.2024 Class Notes"
-author: "Koko"
-date: "2024-09-03"
-output: html_document
+title: "9.3.2024 Class Notes" 
+author: "Koko" 
+date: "2024-09-03" 
+output: html_document 
 bibliography: class_demo.bib
+
 ---
 
 ```{r}
 #packages need a citation
 citation("rmarkdown")
 #can also use Zotero- citation manager 
-#for bibtech
-#knitr::write_bib("rmarkdown", file="class_demo.bib ")
+#for bibtech create a new bib
+knitr::write_bib("rmarkdown", file="class_demo.bib")
 ```
+
+I have been using Rmarkdown package (@R-rmarkdown) -@R-rmarkdown
 
 ## R Markdown
 
@@ -20,16 +23,20 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r}
+list.files()
 ```
 
-## Including Plots
+## Include citation list at the end
 
 You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+install.packages(c("bibtex", "RefManageR"))
+```
+
+```{r}
+citation("tidyverse")
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
