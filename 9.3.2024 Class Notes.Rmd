@@ -105,7 +105,7 @@ x<-rnorm(5)
 
 ```{r}
 #remove files 
-
+file.remove(here("data", "x.Rda"))
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
