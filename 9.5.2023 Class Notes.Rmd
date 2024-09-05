@@ -1,7 +1,7 @@
 ---
 title: "9.5.2024 Class Notes"
 author: "Koko"
-date: "2024-09-03"
+date: "2024-09-05"
 output: html_document
 ---
 
