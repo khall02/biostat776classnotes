@@ -1,0 +1,111 @@
+---
+title: "9.3.2024 Class Notes" 
+author: "Koko" 
+date: "2024-09-03" 
+output: html_document 
+bibliography: class_demo.bib
+
+---
+
+```{r}
+#packages need a citation
+citation("rmarkdown")
+#can also use Zotero- citation manager 
+#for bibtech create a new bib
+knitr::write_bib("rmarkdown", file="class_demo.bib")
+```
+
+I have been using Rmarkdown package (@R-rmarkdown) -@R-rmarkdown
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+list.files()
+```
+
+## Include citation list at the end
+
+You can also embed plots, for example:
+
+```{r}
+install.packages(c("bibtex", "RefManageR"))
+```
+
+```{r}
+citation("tidyverse")
+```
+
+
+Section 7: Reading and Writing DAta 
+
+```{r}
+getwd()
+```
+
+```{r}
+#reltative paths
+setwd("../data")
+#up one folder is ..
+```
+
+```{r}
+#here package helsp you locate file, here::here looks where you are right now- finds the root of our project 
+here::here()
+#This will set the working directory in class notes, in the folder R 
+setwd("R")
+```
+
+```{r}
+library("here")
+list.files(here::here())
+list.files(here("data"))
+
+```
+#read in csv files from folder "Data"
+here("COMPS", "team_standings.csv")
+#assign it to an object "standings", can see this in viewer panel 
+#to use here you need .RProj or Git in the same directory
+standings<-read.csv(here:("data","team_standings.csv" ))
+#you can:
+view(standings)
+#to pick out specific column: 
+standings$Team
+```
+
+```{r}
+#read in an R file using "source"
+source(here::here("R", "2024--09-29.R"),
+       echo=TRUE)
+```
+
+#saving your files 
+#RData stores multiple R objects
+#.Rda stoers the short for .RDAta and is equivilant 
+# .Rds stores a single R object 
+
+```{r}
+x<- 1:5
+save(x, file=here("data", "x.Rda"))
+```
+
+#reassign the saved object previously! 
+```{r}
+newx2<- load(here("data", "x.Rda"))
+newx2
+```
+
+```{r}
+x<-rnorm(5)
+#verbose= TRUE- what are the objects that you laoded? 
+```
+
+```{r}
+#remove files 
+file.remove(here("data", "x.Rda"))
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
