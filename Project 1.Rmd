@@ -54,5 +54,97 @@ glimpse(chocolate)
 
 <span style="font-size: 20px;">Part 1 1. Make a histogram of the rating scores to visualize the overall distribution of scores. Change the number of bins from default to 10, 15, 20, and 25. Pick on the one that you think looks the best. Explain what the difference is when you change the number of bins and explain why you picked the one you did.
 
-```{}
+```{r}
+ggplot(chocolate, aes(x= rating))+
+  geom_histogram(bins=25)+
+  ggtitle("Distribution scores of chocolate rating")
+#With 25 bins, the data is divided into smaller intervals, each bin covers a smaller set of values. With 10 bins, the data is divided into larger intervals, covering a larger range of values. I chose an interval of 25, because you are able to distinguish rating scores better. I feel that this gives more detail about the distribution of chocolate ratings. 
+```
+<span style="font-size: 20px;">2. Consider the countries where the beans originated from. How many reviews come from each country of bean origin?
+
+```{r}
+bean_origin<- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(review_count= n())
+bean_origin
+```
+
+<span style="font-size: 20px;">3.What is average rating scores from reviews of chocolate bars that have Ecuador as country_of_bean_origin in this dataset? For this same set of reviews, also calculate (1) the total number of reviews and (2) the standard deviation of the rating scores. Your answer should be a new data frame with these three summary statistics in three columns. Label the name of these columns mean, sd, and total.
+
+```{r}
+ecuador_summary<- chocolate %>%
+  filter(country_of_bean_origin == "Ecuador") %>%
+  summarise(
+    mean=mean(rating),
+    sd= sd(rating),
+    total= n()
+  )
+ecuador_summary
+
+```
+<span style="font-size: 20px;">4.Which company location makes the best chocolate (or has the highest ratings on average) with beans from Ecuador?
+```{r}
+best_company <- chocolate %>%
+  filter(country_of_bean_origin=='Ecuador') %>%
+  group_by(company_location) %>%
+  summarise(mean_rating= mean(rating)) %>%
+  arrange(desc(mean_rating))
+best_company
+#Australia makes the best chocolate with beans from Ecuador 
+```
+<span style="font-size: 20px;">5. Calculate the average rating across all country of origins for beans. Which top 3 countries (for bean origin) have the highest ratings on average?
+
+```{r}
+best_origin <- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(mean_rating= mean(rating)) %>%
+  arrange(desc(mean_rating))
+best_origin
+#Top 3 bean origins (by country): Tobago, China, Sao Tome & Principe
+```
+<span style="font-size: 20px;"> 6.Following up on the previous problem, now remove any countries of bean origins that have less than 10 chocolate bar reviews. Now, which top 3 countries have the highest ratings on average?
+```{r}
+Top3_rm10<- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(
+    mean_rating= mean(rating),
+    total_reviews=n() 
+  )%>%
+  filter(total_reviews>=10) %>%
+  arrange(desc(mean_rating))
+Top3_rm10
+#Excluding those that have less than 10 chocolate revies, the top 3 countries are now Solomon Islands, Congo, and Cuba 
+```
+
+<span style="font-size: 20px;">7. For this last part, let’s explore the relationship between percent chocolate and ratings.
+Use the functions in dplyr, tidyr, and lubridate to perform the following steps to the chocolate dataset:
+1. Identify the countries of bean origin with at least 50 reviews. Remove reviews from countries are not in this list.
+2. Using the variable describing the chocolate percentage for each review, create a new column that groups chocolate percentages into one of four groups: (i) <60%, (ii) >=60 to <70%, (iii) >=70 to <90%, and (iii) >=90% (Hint check out the substr() function in base R and the case_when() function from dplyr – see example below).
+Using the new column described in #2, re-order the factor levels (if needed) to be starting with the smallest percentage group and increasing to the largest percentage group (Hint check out the fct_relevel() function from forcats).
+For each country, make a set of four side-by-side boxplots plotting the groups on the x-axis and the ratings on the y-axis. These plots should be faceted by country.
+```{r}
+fiftyrevs<- chocolate %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(
+    total_reviews=n()
+  )%>%
+  filter(total_reviews>=50) 
+fiftyrevs
+
+chocolate_50 <- chocolate %>%
+  filter(country_of_bean_origin %in% fiftyrevs$country_of_bean_origin)
+```
+
+```{r}
+chocolate_50 %>%
+  mutate(
+    cocoa_numeric = as.numeric(gsub("%", "", cocoa_percent)),
+    
+    percent_group = case_when (
+      cocoa_numeric <60 ~"1", 
+      cocoa_numeric >=60 & cocoa_numeric <70 ~ "2",
+      cocoa_numeric >=70 & cocoa_numeric <90 ~ "3",
+      cocoa_numeric >= 90 ~ "4"
+    )
+  )
 ```
