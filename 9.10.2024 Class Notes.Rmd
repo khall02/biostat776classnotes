@@ -7,26 +7,131 @@ output: html_document
 
 Will need this for project 1 part 2 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r}
+
+library(tidyverse)
+
+outcomes <- tibble(
+    id = rep(c("a", "b", "c"), each = 3),
+    visit = rep(0:2, 3),
+    outcome = rnorm(3 * 3, 3)
+)
+#have the info, but not easily accessible- extract info 
+
+
+print(outcomes)
+
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+subjects <- tibble(
+    id = c("a", "b", "c"),
+    house = c("detached", "rowhouse", "rowhouse")
+)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+print(subjects)
 
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
+```{r}
+library(knitr)
+join_funcs <- data.frame(
+    func = c(
+        "`left_join()`",
+        "`right_join()`",
+        "`inner_join()`",
+        "`full_join()`"
+    ),
+    does = c(
+        "Includes all observations in the left data frame, whether or not there is a match in the right data frame",
+        "Includes all observations in the right data frame, whether or not there is a match in the left data frame",
+        "Includes only observations that are in both data frames",
+        "Includes all observations from both data frames"
+    )
+)
+knitr::kable(join_funcs, col.names = c("Function", "What it includes in merged data frame"))
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
+```{r}
+outcomes
+subjects
+```
+
+```{r}
+left_join(x = outcomes, y = subjects, by = "id")
+full_join(x= outcomes, y=subjects, by= "id")
+
+```
+
+
+GGplot 2 `
+```{r}
+library("tidyverse")
+library("here")
+maacs <- read_csv(here("data", "bmi_pm25_no2_sim.csv"),
+    col_types = "nnci"
+)
+
+```
+
+```{r}
+g <- ggplot(maacs, aes(
+    x = logpm25,
+    y = NocturnalSympt
+))
+summary(g)
+```
+
+
+```{r}
+g <- maacs %>%
+    ggplot(aes(logpm25, NocturnalSympt))
+print(g)
+```
+
+```{r}
+g <- maacs %>%
+    ggplot(aes(logpm25, NocturnalSympt))
+g + geom_point()
+```
+
+#add smooth line
+
+```{r}
+g +
+    geom_point() +
+    geom_smooth()
+```
+
+#add linear relationship 
+
+```{r}
+
+g +
+    geom_point() +
+    geom_smooth(method = "lm")
+```
+
+
+
+#data for 340 penguins
+
+```{r}
+install.packages("palmerpenguins")
+library(palmerpenguins)
+
+glimpse(penguins)
+```
+
+```{r}
+penguins %>%
+  ggplot(mapping= aes(x= flipper_length_mm, y= bill_length_mm,
+  color= species)) + 
+  geom_point()+ 
+  geom_smooth(method= "lm")
+```
+maacs
+
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
