@@ -159,7 +159,8 @@ ggplot(chocolate_50, aes(x = percent_group, y = rating)) +
   labs(x = "Group", y = "Rating", title = "Boxplots of Ratings by Percent Group and Country of Bean Origin") +
   theme_minimal()
 ```
-<span style="font-size: 20px;Part 2: Join two datasets together
+
+<span style="font-size: 20px;">Part 2. Join two datasets together
 The goal of this part of the assignment is to join two datasets together. gapminder is a R package that contains an excerpt from the Gapminder data.
 
 ```{r}
@@ -176,6 +177,7 @@ country_continent <- gapminder %>%
 
 
 ```{r}
+#Join country_continent with chocolate
 chocolate_continent <-chocolate %>%
   left_join(country_continent, by = c("country_of_bean_origin"="country")) %>%
   filter(country_of_bean_origin != "Blend")
@@ -183,6 +185,7 @@ chocolate_continent
 ```
 
 ```{r}
+#Remove those with less than 10 reviews 
 tenrevs<- chocolate_continent %>%
   group_by(country_of_bean_origin) %>%
   summarise(total_reviews = n()) %>%
@@ -217,11 +220,79 @@ chocolate_continent_10
 ```
 
 ```{r}
+#Create violin plots 
 ggplot(chocolate_continent_10, aes(x = continent, y = rating)) +
   geom_violin(aes(fill = continent), color = "black") +  
   geom_boxplot(width = 0.1, color = "black", alpha = 0.7, position = position_dodge(0.9)) +  # Box plot inside the violin
   scale_fill_manual(values = c("Americas" = "lightblue", "Asia" = "lightgreen", "Oceania" = "lightcoral", "Africa"= "purple")) +  # Custom colors
   labs(title = "Violin Plot with Box Plot of Ratings by Continent", x = "Continent", y = "Rating") +
   theme_classic()
+```
+<span style="font-size: 20px;">Part 3. Convert wide into long data. Tasks
+We are going to create a set of features for us to plot over time. Use the functions in dplyr and tidyr to perform the following steps to the chocolate dataset:
+
+1.Create a new set of columns titled beans, sugar, cocoa_butter, vanilla, letchin, and salt that contain a 1 or 0 representing whether or not that review for the chocolate bar contained that ingredient (1) or not (0).
+2.Create a new set of columns titled char_cocoa, char_sweet, char_nutty, char_creamy, char_roasty, char_earthy that contain a 1 or 0 representing whether or not that the most memorable characteristic for the chocolate bar had that word (1) or not (0). For example, if the word “sweet” appears in the most_memorable_characteristics, then record a 1, otherwise a 0 for that review in the char_sweet column (Hint: check out str_detect() from the stringr package).
+3.For each year (i.e. review_date), calculate the mean value in each new column you created across all reviews for that year. (Hint: If all has gone well thus far, you should have a dataset with 16 rows and 13 columns).4.
+Convert this wide dataset into a long dataset with a new feature and mean_score column.
+
+```{r}
+
+chocolate_ingred <- chocolate %>%
+  mutate(
+    beans = ifelse(grepl("B", ingredients), 1, 0),
+    sugar = ifelse(grepl("S", ingredients), 1, 0),
+    cocoa_butter = ifelse(grepl("C", ingredients), 1, 0),
+    vanilla = ifelse(grepl("V", ingredients), 1, 0),
+    letchin = ifelse(grepl("L", ingredients), 1, 0),
+    salt = ifelse(grepl("Sa", ingredients), 1, 0)  
+  )
+
+```
+
+```{r}
+library(stringr)
+chocolate_char <- chocolate_ingred %>%
+  mutate(
+    char_cocoa = ifelse(str_detect(most_memorable_characteristics, "cocoa"), 1, 0),
+    char_sweet = ifelse(str_detect(most_memorable_characteristics, "sweet"), 1, 0),
+    char_nutty = ifelse(str_detect(most_memorable_characteristics, "nutty"), 1, 0),
+    char_creamy = ifelse(str_detect(most_memorable_characteristics, "creamy"), 1, 0),
+    char_roasty = ifelse(str_detect(most_memorable_characteristics, "roasty"), 1, 0),
+    char_earthy = ifelse(str_detect(most_memorable_characteristics, "earthy"), 1, 0)
+  )
+
+```
+
+```{r}
+#sort by year, mean value of scores 
+mean_values_year <- chocolate_char %>%
+  group_by(review_date) %>%
+  summarise(
+    mean_beans = mean(beans),
+    mean_sugar = mean(sugar),
+    mean_cocoa_butter = mean(cocoa_butter),
+    mean_vanilla = mean(vanilla),
+    mean_letchin = mean(letchin),
+    mean_salt = mean(salt),
+    mean_char_cocoa = mean(char_cocoa),
+    mean_char_sweet = mean(char_sweet),
+    mean_char_nutty = mean(char_nutty),
+    mean_char_creamy = mean(char_creamy),
+    mean_char_roasty = mean(char_roasty),
+    mean_char_earthy = mean(char_earthy)
+  )
+mean_values_year
+```
+
+```{r}
+#convert wide into long
+chocolate_long <- mean_values_year %>%
+  pivot_longer(
+    cols = mean_beans:mean_char_earthy, 
+    names_to = "feature",  # New column for feature
+    values_to = "mean_score"  # New column for the mean scores
+  )
+chocolate_long
 ```
 
