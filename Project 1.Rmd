@@ -120,8 +120,8 @@ Top3_rm10
 Use the functions in dplyr, tidyr, and lubridate to perform the following steps to the chocolate dataset:
 1. Identify the countries of bean origin with at least 50 reviews. Remove reviews from countries are not in this list.
 2. Using the variable describing the chocolate percentage for each review, create a new column that groups chocolate percentages into one of four groups: (i) <60%, (ii) >=60 to <70%, (iii) >=70 to <90%, and (iii) >=90% (Hint check out the substr() function in base R and the case_when() function from dplyr – see example below).
-Using the new column described in #2, re-order the factor levels (if needed) to be starting with the smallest percentage group and increasing to the largest percentage group (Hint check out the fct_relevel() function from forcats).
-For each country, make a set of four side-by-side boxplots plotting the groups on the x-axis and the ratings on the y-axis. These plots should be faceted by country.
+3.Using the new column described in #2, re-order the factor levels (if needed) to be starting with the smallest percentage group and increasing to the largest percentage group (Hint check out the fct_relevel() function from forcats).
+4.For each country, make a set of four side-by-side boxplots plotting the groups on the x-axis and the ratings on the y-axis. These plots should be faceted by country.
 ```{r}
 fiftyrevs<- chocolate %>%
   group_by(country_of_bean_origin) %>%
@@ -136,15 +136,26 @@ chocolate_50 <- chocolate %>%
 ```
 
 ```{r}
-chocolate_50 %>%
+chocolate_50 <- chocolate_50 %>%
   mutate(
-    cocoa_numeric = as.numeric(gsub("%", "", cocoa_percent)),
+    cocoa_numeric = as.numeric(gsub("%", "", cocoa_percent)), 
     
-    percent_group = case_when (
-      cocoa_numeric <60 ~"1", 
-      cocoa_numeric >=60 & cocoa_numeric <70 ~ "2",
-      cocoa_numeric >=70 & cocoa_numeric <90 ~ "3",
+    percent_group = case_when(
+      cocoa_numeric < 60 ~ "1", 
+      cocoa_numeric >= 60 & cocoa_numeric < 70 ~ "2",
+      cocoa_numeric >= 70 & cocoa_numeric < 90 ~ "3",
       cocoa_numeric >= 90 ~ "4"
-    )
-  )
+    ) %>%
+    factor(levels = c("1", "2", "3", "4"))
+  ) %>%
+  arrange(percent_group)
+chocolate_50
+```
+
+```{r}
+ggplot(chocolate_50, aes(x = percent_group, y = rating)) +
+  geom_boxplot() +  
+  facet_wrap(~ country_of_bean_origin) +  
+  labs(x = "Group", y = "Rating", title = "Boxplots of Ratings by Percent Group and Country of Bean Origin") +
+  theme_minimal()
 ```
