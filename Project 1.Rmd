@@ -159,3 +159,69 @@ ggplot(chocolate_50, aes(x = percent_group, y = rating)) +
   labs(x = "Group", y = "Rating", title = "Boxplots of Ratings by Percent Group and Country of Bean Origin") +
   theme_minimal()
 ```
+<span style="font-size: 20px;Part 2: Join two datasets together
+The goal of this part of the assignment is to join two datasets together. gapminder is a R package that contains an excerpt from the Gapminder data.
+
+```{r}
+library(gapminder)
+head(gapminder)
+```
+
+```{r}
+#Create a unique list of countries and their corresponding continent 
+country_continent <- gapminder %>%
+  select (country, continent) %>%
+  distinct()
+```
+
+
+```{r}
+chocolate_continent <-chocolate %>%
+  left_join(country_continent, by = c("country_of_bean_origin"="country")) %>%
+  filter(country_of_bean_origin != "Blend")
+chocolate_continent
+```
+
+```{r}
+tenrevs<- chocolate_continent %>%
+  group_by(country_of_bean_origin) %>%
+  summarise(total_reviews = n()) %>%
+  filter(total_reviews >= 10)
+
+chocolate_continent_10 <- chocolate_continent %>%
+  filter(country_of_bean_origin %in% tenrevs$country_of_bean_origin)
+
+chocolate_continent_10
+```
+
+
+```{r}
+#Fill in NAs
+chocolate_continent_10 <- chocolate_continent_10 %>%
+  mutate(continent = case_when(
+    country_of_bean_origin == "Belize" ~ "Americas",
+    country_of_bean_origin == "U.S.A." ~ "Americas",
+    country_of_bean_origin == "Congo" ~ "Africa", 
+    country_of_bean_origin == "Fiji" ~ "Oceania",
+    country_of_bean_origin == "Grenada" ~ "Americas",
+    country_of_bean_origin == "Papua New Guinea" ~ "Oceania",
+    country_of_bean_origin == "Sao Tome" ~ "Africa",
+    country_of_bean_origin == "Solomon Islands" ~ "Oceania",
+    country_of_bean_origin == "St. Lucia"~ "Americas",
+    country_of_bean_origin == "Trinidad" ~ "Americas",
+    country_of_bean_origin == "Vanuatu" ~ "Oceania",
+    TRUE ~ continent
+  ))
+
+chocolate_continent_10
+```
+
+```{r}
+ggplot(chocolate_continent_10, aes(x = continent, y = rating)) +
+  geom_violin(aes(fill = continent), color = "black") +  
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.7, position = position_dodge(0.9)) +  # Box plot inside the violin
+  scale_fill_manual(values = c("Americas" = "lightblue", "Asia" = "lightgreen", "Oceania" = "lightcoral", "Africa"= "purple")) +  # Custom colors
+  labs(title = "Violin Plot with Box Plot of Ratings by Continent", x = "Continent", y = "Rating") +
+  theme_classic()
+```
+
