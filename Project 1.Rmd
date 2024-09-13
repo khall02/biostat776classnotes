@@ -228,13 +228,9 @@ ggplot(chocolate_continent_10, aes(x = continent, y = rating)) +
   labs(title = "Violin Plot with Box Plot of Ratings by Continent", x = "Continent", y = "Rating") +
   theme_classic()
 ```
-<span style="font-size: 20px;">Part 3. Convert wide into long data. Tasks
-We are going to create a set of features for us to plot over time. Use the functions in dplyr and tidyr to perform the following steps to the chocolate dataset:
 
-1.Create a new set of columns titled beans, sugar, cocoa_butter, vanilla, letchin, and salt that contain a 1 or 0 representing whether or not that review for the chocolate bar contained that ingredient (1) or not (0).
-2.Create a new set of columns titled char_cocoa, char_sweet, char_nutty, char_creamy, char_roasty, char_earthy that contain a 1 or 0 representing whether or not that the most memorable characteristic for the chocolate bar had that word (1) or not (0). For example, if the word “sweet” appears in the most_memorable_characteristics, then record a 1, otherwise a 0 for that review in the char_sweet column (Hint: check out str_detect() from the stringr package).
-3.For each year (i.e. review_date), calculate the mean value in each new column you created across all reviews for that year. (Hint: If all has gone well thus far, you should have a dataset with 16 rows and 13 columns).4.
-Convert this wide dataset into a long dataset with a new feature and mean_score column.
+<span style="font-size: 20px;">Part 3. Convert wide into long data. Tasks
+We are going to create a set of features for us to plot over time. Use the functions in dplyr and tidyr to perform the following steps to the chocolate dataset:1.Create a new set of columns titled beans, sugar, cocoa_butter, vanilla, letchin, and salt that contain a 1 or 0 representing whether or not that review for the chocolate bar contained that ingredient (1) or not (0).2.Create a new set of columns titled char_cocoa, char_sweet, char_nutty, char_creamy, char_roasty, char_earthy that contain a 1 or 0 representing whether or not that the most memorable characteristic for the chocolate bar had that word (1) or not (0). For example, if the word “sweet” appears in the most_memorable_characteristics, then record a 1, otherwise a 0 for that review in the char_sweet column (Hint: check out str_detect() from the stringr package). 3.For each year (i.e. review_date), calculate the mean value in each new column you created across all reviews for that year. (Hint: If all has gone well thus far, you should have a dataset with 16 rows and 13 columns).4.Convert this wide dataset into a long dataset with a new feature and mean_score column.
 
 ```{r}
 
@@ -295,4 +291,88 @@ chocolate_long <- mean_values_year %>%
   )
 chocolate_long
 ```
+
+<span style="font-size: 20px;">Part 4. In this part of the project, we will continue to work with our now tidy song dataset from the previous part.Tasks:Use the functions in ggplot2 package to make a scatter plot of the mean_scores (y-axis) over time (x-axis). There should be one plot (facet) for each feature. For full credit, your plot should include:An overall title for the plot and a subtitle summarizing key trends that you found. Also include a caption in the figure with your name.Both the observed points for the mean_score, but also a smoothed non-linear pattern of the trend. All plots should be shown in the one figure. There should be an informative x-axis and y-axis label
+
+```{r}
+
+ggplot(chocolate_long, aes(x = review_date, y = mean_score)) +
+  geom_point() +  # Scatter points for mean scores
+  geom_smooth(method = "loess", se = FALSE, color= "purple") +  # Smoothed non-linear trend
+  labs(
+    title = "Mean Scores Over Time by Feature of Chocolate",
+     subtitle = str_wrap(" Mean scores of ingredients: lecithin, vanilla, and cocoa butter decrease over time. Generally, mean scores of the most memorable characteristics, creamy, decreased over time, while sweet and cocoa have increased in the last five years.", width = 80),
+    caption = "Koko Hall",
+    x = "Review Date (Year)",  
+    y = "Mean Feature Scores" 
+  ) +
+  facet_wrap(~feature, scales = "free_y") +  # Facet for each feature
+  theme_light()
+
+
+```
+
+<span style="font-size: 20px;">Part 5.Make the worst plot you can!
+This sounds a bit crazy I know, but I want this to try and be FUN! Instead of trying to make a “good” plot, I want you to explore your creative side and make a really awful data visualization in every way. :)Tasks: Using the chocolate dataset (or any of the modified versions you made throughout this assignment or anything else you wish you build upon it):Make the absolute worst plot that you can. You need to customize it in at least 7 ways to make it awful.In your document, write 1 - 2 sentences about each different customization you added (using bullets – i.e. there should be at least 7 bullet points each with 1-2 sentences), and how it could be useful for you when you want to make an awesome data visualization.
+
+```{r}
+ggplot(mean_values_year, aes(x = review_date, y = mean_char_creamy)) +
+  geom_point()+ 
+  geom_smooth(method = "loess", color= "white", se=FALSE) + 
+  scale_y_continuous(limits= c(0, 10)) +
+  scale_x_continuous(limits= c(1990, 2025)) + 
+  labs (title= "Graph")+
+  theme(
+    axis.title.x  = element_blank(),
+    axis.title.y = element_blank(),
+    plot.title = element_text (size=8),
+    panel.background = element_rect(fill = "white"), # Light panel background
+  )+
+  annotate("text", x=2008, y=5, label= "Koko", size= 60, color = "red", fontface= "bold")
+
+```
+
+<span style="font-size: 20px;">1.The title is extremely small and not readable
+2.The title is not informative. Titles help the viewer undrestand what
+the graph is about.
+3.There are no y or x axis labels 
+4.The plot has a smoothed, non-linear line, but it is in white. It's very hard to see the line. 
+5. The x-axis contains years that were before the study was conducted. There is a lot of unnecessary space.
+6. The Y-axis is not scaled correctly, you aren't able to observe the trend in the data 
+7. The caption is centerd with the creator's name and is blocking the contents of the graph
+
+
+
+<span style="font-size: 20px;">Part 6. Make my plot a better plot!
+The goal is to take my sad looking plot and make it better! If you’d like an example, here is a tweet I came across of someone who gave a talk about how to zhoosh up your ggplots.
+```{r}
+chocolate %>%
+  ggplot(aes(
+    x = as.factor(review_date),
+    y = rating,
+    fill = as.factor(review_date)  # Map fill to review_date
+  )) +
+  geom_violin(adjust = 1.5) +                            # Adjusted violin density for smoother plots
+  scale_fill_manual(values = rainbow(length(unique(chocolate$review_date)))) +  # Use rainbow palette
+  geom_boxplot(width = 0.1, color = "black", alpha = 0.5) +  # Overlay boxplots
+  scale_x_discrete(breaks = seq(min(chocolate$review_date), max(chocolate$review_date), by = 5)) +    
+  labs(
+    title = "Chocolate Rating by Year",
+    subtitle = str_wrap ("The range of chocolate ratings has narrowed over time. Medians scores have remained relatively stable ",  width = 80) ,
+    x = "Review Year",
+    y = "Rating",
+    fill = "Review Year"
+  ) +
+  theme_minimal() +                                  # Apply a clean minimal theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+```
+
+<span style="font-size: 20px;">1. I added a clear title to tell the reader what the graph was about
+2. The x and y axes needed to be re-labelled 
+3. The years on the x axis were too crammed. I labelled the axis with less # of years
+4. I tilted the x-axis years so they were more readable on the graph 
+5. The monochromatic blue was hard to distinguish the different years. Different colors per year were easier to follow. 
+6. I added a subtitle to describe the graph
+7. I added boxplots to overlay the violin plots. We can measure the median and IQR values easier.
+
 
